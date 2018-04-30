@@ -560,7 +560,14 @@ def do_apply
     next true if line =~ /^base /
     if line =~ /^merge (.*)$/
       system(*%W[git merge-base --is-ancestor #{$1.split(' ')[0]} HEAD])
-      next true if $?.success?
+      if $?.success?
+        $skipping = true
+        next true
+      else
+        $skipping = false
+      end
+    elsif line =~ /^fixup (.*)$/
+      next true if $skipping
     end
     false
   end.join
